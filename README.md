@@ -3,7 +3,7 @@
 Source of the project page for [AlphaForge](https://github.com/apkmasondev/AlphaForge) — a free, local
 image toolkit for Windows (AI background removal with real alpha, upscale, resize, convert, compress).
 
-**Live:** https://apkmasondev.github.io/alphaforge-site/
+**Live:** https://apkmason.dev/alphaforge-site/
 
 Plain HTML, CSS and a little JavaScript — no build step, no frameworks, no cookies, no analytics, no
 external fonts. English and Polish (auto-detected, switchable).
