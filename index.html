@@ -1,0 +1,592 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AlphaForge — local background removal &amp; image toolkit for Windows</title>
+  <meta name="description" content="Free, open-source Windows app: AI background removal with real alpha (hair and fur), trim, padding, resize, AI upscale, convert and compress to PNG, JPG, WebP and AVIF. Batch pipelines. Everything runs locally — nothing is uploaded.">
+  <meta name="color-scheme" content="dark light">
+  <meta name="theme-color" content="#101114" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#f6f7f9" media="(prefers-color-scheme: light)">
+  <link rel="canonical" href="https://apkmasondev.github.io/alphaforge-site/">
+  <link rel="icon" href="assets/favicon.ico" sizes="any">
+  <link rel="icon" href="assets/favicon-48.png" type="image/png">
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="AlphaForge — local background removal & image toolkit">
+  <meta property="og:description" content="AI cut-outs with real alpha, upscale, resize, convert and compress — in batches, on your own PC. Free and open source for Windows.">
+  <meta property="og:url" content="https://apkmasondev.github.io/alphaforge-site/">
+  <meta property="og:image" content="https://apkmasondev.github.io/alphaforge-site/assets/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <script>
+    // Applied before first paint so there is no flash of the wrong theme or language.
+    (function () {
+      var d = document.documentElement, t = null, l = null;
+      try { t = localStorage.getItem("af-theme"); l = localStorage.getItem("af-lang"); } catch (e) {}
+      if (t === "light" || t === "dark") d.setAttribute("data-theme", t);
+      if (l !== "en" && l !== "pl") l = /^pl\b/i.test(navigator.language || "") ? "pl" : "en";
+      d.setAttribute("data-lang", l);
+      d.lang = l;
+    })();
+  </script>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+    <symbol id="i-scissors" viewBox="0 0 24 24"><circle cx="6" cy="6" r="3"/><path d="M8.12 8.12 12 12"/><path d="M20 4 8.12 15.88"/><circle cx="6" cy="18" r="3"/><path d="M14.8 14.8 20 20"/></symbol>
+    <symbol id="i-crop" viewBox="0 0 24 24"><path d="M6 2v14a2 2 0 0 0 2 2h14"/><path d="M18 22V8a2 2 0 0 0-2-2H2"/></symbol>
+    <symbol id="i-maximize-2" viewBox="0 0 24 24"><path d="M15 3h6v6"/><path d="m21 3-7 7"/><path d="m3 21 7-7"/><path d="M9 21H3v-6"/></symbol>
+    <symbol id="i-wand-sparkles" viewBox="0 0 24 24"><path d="m21.64 3.64-1.28-1.28a1.21 1.21 0 0 0-1.72 0L2.36 18.64a1.21 1.21 0 0 0 0 1.72l1.28 1.28a1.2 1.2 0 0 0 1.72 0L21.64 5.36a1.2 1.2 0 0 0 0-1.72"/><path d="m14 7 3 3"/><path d="M5 6v4"/><path d="M19 14v4"/><path d="M10 2v2"/><path d="M7 8H3"/><path d="M21 16h-4"/><path d="M11 3H9"/></symbol>
+    <symbol id="i-layers" viewBox="0 0 24 24"><path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83z"/><path d="M2 12a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 12"/><path d="M2 17a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 17"/></symbol>
+    <symbol id="i-shield-check" viewBox="0 0 24 24"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></symbol>
+    <symbol id="i-cpu" viewBox="0 0 24 24"><path d="M12 20v2"/><path d="M12 2v2"/><path d="M17 20v2"/><path d="M17 2v2"/><path d="M2 12h2"/><path d="M2 17h2"/><path d="M2 7h2"/><path d="M20 12h2"/><path d="M20 17h2"/><path d="M20 7h2"/><path d="M7 20v2"/><path d="M7 2v2"/><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="8" y="8" width="8" height="8" rx="1"/></symbol>
+    <symbol id="i-zap" viewBox="0 0 24 24"><path d="M15.914 4a1.5 1.5 0 00-2.474-1.561l-9 9A1.5 1.5 0 005.5 14h4.002a.5.5 0 01.471.666L8.086 20a1.5 1.5 0 002.475 1.56l9-9A1.5 1.5 0 0018.5 10h-3.997a.5.5 0 01-.472-.667z"/></symbol>
+    <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 15V3"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/></symbol>
+    <symbol id="i-image-plus" viewBox="0 0 24 24"><path d="M16 5h6"/><path d="M19 2v6"/><path d="M21 11.5V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7.5"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/><circle cx="9" cy="9" r="2"/></symbol>
+    <symbol id="i-sliders-horizontal" viewBox="0 0 24 24"><path d="M10 5H3"/><path d="M12 19H3"/><path d="M14 3v4"/><path d="M16 17v4"/><path d="M21 12h-9"/><path d="M21 19h-5"/><path d="M21 5h-7"/><path d="M8 10v4"/><path d="M8 12H3"/></symbol>
+    <symbol id="i-languages" viewBox="0 0 24 24"><path d="m5 8 6 6"/><path d="m4 14 6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="m22 22-5-10-5 10"/><path d="M14 18h6"/></symbol>
+    <symbol id="i-clipboard" viewBox="0 0 24 24"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></symbol>
+    <symbol id="i-folder-open" viewBox="0 0 24 24"><path d="m6 14 1.5-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.54 6a2 2 0 0 1-1.95 1.5H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H18a2 2 0 0 1 2 2v2"/></symbol>
+    <symbol id="i-sun-moon" viewBox="0 0 24 24"><path d="M12 2v2"/><path d="M14.837 16.385a6 6 0 1 1-7.223-7.222c.624-.147.97.66.715 1.248a4 4 0 0 0 5.26 5.259c.589-.255 1.396.09 1.248.715"/><path d="M16 12a4 4 0 0 0-4-4"/><path d="m19 5-1.256 1.256"/><path d="M20 12h2"/></symbol>
+    <symbol id="i-brush" viewBox="0 0 24 24"><path d="m11 10 3 3"/><path d="M6.5 21A3.5 3.5 0 1 0 3 17.5a2.62 2.62 0 0 1-.708 1.792A1 1 0 0 0 3 21z"/><path d="M9.969 17.031 21.378 5.624a1 1 0 0 0-3.002-3.002L6.967 14.031"/></symbol>
+    <symbol id="i-scan" viewBox="0 0 24 24"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/></symbol>
+    <symbol id="i-expand" viewBox="0 0 24 24"><path d="m15 15 6 6"/><path d="m15 9 6-6"/><path d="M21 16v5h-5"/><path d="M21 8V3h-5"/><path d="M3 16v5h5"/><path d="m3 21 6-6"/><path d="M3 8V3h5"/><path d="M9 9 3 3"/></symbol>
+    <symbol id="i-arrow-up-right" viewBox="0 0 24 24"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+    <symbol id="i-heart" viewBox="0 0 24 24"><path d="M2 9.5a5.5 5.5 0 0 1 9.591-3.676.56.56 0 0 0 .818 0A5.49 5.49 0 0 1 22 9.5c0 2.29-1.5 4-3 5.5l-5.492 5.313a2 2 0 0 1-3 .019L5 15c-1.5-1.5-3-3.2-3-5.5"/></symbol>
+    <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></symbol>
+    <symbol id="i-gauge" viewBox="0 0 24 24"><path d="m12 14 4-4"/><path d="M3.34 19a10 10 0 1 1 17.32 0"/></symbol>
+    <symbol id="i-workflow" viewBox="0 0 24 24"><rect width="8" height="8" x="3" y="3" rx="2"/><path d="M7 11v4a2 2 0 0 0 2 2h4"/><rect width="8" height="8" x="13" y="13" rx="2"/></symbol>
+    <symbol id="i-file-image" viewBox="0 0 24 24"><path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/><circle cx="10" cy="12" r="2"/><path d="m20 17-1.296-1.296a2.41 2.41 0 0 0-3.408 0L9 22"/></symbol>
+    <symbol id="i-sparkles" viewBox="0 0 24 24"><path d="M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594z"/><path d="M20 2v4"/><path d="M22 4h-4"/><circle cx="4" cy="20" r="2"/></symbol>
+    <symbol id="i-monitor" viewBox="0 0 24 24"><rect width="20" height="14" x="2" y="3" rx="2"/><line x1="8" x2="16" y1="21" y2="21"/><line x1="12" x2="12" y1="17" y2="21"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></symbol>
+    <symbol id="i-chevron-left" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></symbol>
+    <symbol id="i-chevron-right" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></symbol>
+    <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></symbol>
+    <symbol id="i-github" viewBox="0 0 16 16"><path fill="currentColor" stroke="none" d="M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z"/></symbol>
+    </defs>
+  </svg>
+
+  <a class="skip" href="#main"><span data-l="en">Skip to content</span><span data-l="pl">Przejdź do treści</span></a>
+
+  <header class="top" id="top">
+    <div class="wrap top-in">
+      <a class="brand" href="#top" aria-label="AlphaForge">
+        <img src="assets/icon-256.png" width="28" height="28" alt="">
+        <span>AlphaForge</span>
+      </a>
+      <nav class="nav" aria-label="Main">
+        <a href="#features"><span data-l="en">Features</span><span data-l="pl">Funkcje</span></a>
+        <a href="#screens"><span data-l="en">Screenshots</span><span data-l="pl">Zrzuty ekranu</span></a>
+        <a href="#privacy"><span data-l="en">Privacy</span><span data-l="pl">Prywatność</span></a>
+        <a href="#faq">FAQ</a>
+      </nav>
+      <div class="top-actions">
+        <div class="seg" role="group" aria-label="Language / Język">
+          <button type="button" data-set-lang="en" aria-pressed="false">EN</button>
+          <button type="button" data-set-lang="pl" aria-pressed="false">PL</button>
+        </div>
+        <button type="button" class="icon-btn" id="theme-btn" aria-label="Toggle theme" data-pl-aria-label="Przełącz motyw">
+          <svg class="ico"><use href="#i-sun-moon"/></svg>
+        </button>
+        <a class="icon-btn" href="https://github.com/apkmasondev/AlphaForge" aria-label="AlphaForge on GitHub" data-pl-aria-label="AlphaForge na GitHubie">
+          <svg class="ico"><use href="#i-github"/></svg>
+        </a>
+        <a class="btn btn-primary btn-sm top-dl" href="#download">
+          <svg class="ico"><use href="#i-download"/></svg>
+          <span data-l="en">Download</span><span data-l="pl">Pobierz</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main id="main">
+    <!-- Hero -->
+    <section class="hero">
+      <div class="wrap hero-in">
+        <p class="eyebrow">
+          <span data-l="en">Free &amp; open source · Windows 10 and 11</span>
+          <span data-l="pl">Za darmo, open source · Windows 10 i 11</span>
+        </p>
+        <h1>
+          <span data-l="en">Clean cut-outs. Real alpha. <em>Right on your PC.</em></span>
+          <span data-l="pl">Czyste wycięcia. Prawdziwa przezroczystość. <em>Na Twoim komputerze.</em></span>
+        </h1>
+        <p class="lead">
+          <span data-l="en">AlphaForge removes backgrounds with AI — down to individual hairs — then trims, pads, resizes, upscales, converts and compresses. One image or a hundred, in one pipeline. Nothing is ever uploaded.</span>
+          <span data-l="pl">AlphaForge usuwa tło za pomocą AI — aż po pojedyncze włosy — a potem przycina, dodaje marginesy, zmienia rozmiar, powiększa, konwertuje i kompresuje. Jeden obraz albo sto, w jednym pipelinie. Nic nie jest wysyłane do sieci.</span>
+        </p>
+        <div class="cta">
+          <a class="btn btn-primary btn-lg" href="https://github.com/apkmasondev/AlphaForge/releases/download/v1.0.0/AlphaForge_1.0.0_x64-setup.exe">
+            <svg class="ico"><use href="#i-download"/></svg>
+            <span><span data-l="en">Download for Windows</span><span data-l="pl">Pobierz dla Windows</span>
+              <small>v1.0.0 · 158 MB · 64-bit</small></span>
+          </a>
+          <a class="btn btn-ghost btn-lg" href="https://github.com/apkmasondev/AlphaForge">
+            <svg class="ico"><use href="#i-github"/></svg>
+            <span data-l="en">Source on GitHub</span><span data-l="pl">Kod na GitHubie</span>
+          </a>
+        </div>
+        <ul class="ticks">
+          <li><svg class="ico"><use href="#i-check"/></svg><span data-l="en">No account</span><span data-l="pl">Bez konta</span></li>
+          <li><svg class="ico"><use href="#i-check"/></svg><span data-l="en">No uploads</span><span data-l="pl">Bez wysyłania plików</span></li>
+          <li><svg class="ico"><use href="#i-check"/></svg><span data-l="en">No telemetry</span><span data-l="pl">Bez telemetrii</span></li>
+          <li><svg class="ico"><use href="#i-check"/></svg><span data-l="en">No ads, no paid tier</span><span data-l="pl">Bez reklam i płatnych wersji</span></li>
+        </ul>
+      </div>
+      <div class="wrap">
+        <figure class="window hero-shot">
+          <div class="window-bar" aria-hidden="true"><i></i><i></i><i></i></div>
+          <button type="button" class="shot-btn" data-open="hero">
+            <img data-shot="hero" width="1800" height="1125"
+                 srcset="" sizes="(max-width: 1220px) 100vw, 1180px"
+                 alt="AlphaForge main window: a puppy cut out with the Hair &amp; fur model on a transparent background"
+                 data-pl-alt="Główne okno AlphaForge: szczeniak wycięty modelem Włosy i sierść na przezroczystym tle"
+                 fetchpriority="high">
+            <script>
+              // Pick the screenshot in the visitor's language before anything is downloaded.
+              (function (img, l) {
+                img.srcset = "assets/shots/" + l + "-hero-sm.webp 900w, assets/shots/" + l + "-hero.webp 1800w";
+                img.src = "assets/shots/" + l + "-hero.webp";
+              })(document.currentScript.previousElementSibling, document.documentElement.getAttribute("data-lang"));
+            </script>
+            <noscript><img src="assets/shots/en-hero.webp" width="1800" height="1125" alt="AlphaForge main window"></noscript>
+          </button>
+        </figure>
+      </div>
+    </section>
+
+    <!-- Hobby note -->
+    <section class="wrap">
+      <div class="hobby">
+        <div class="hobby-ico"><svg class="ico"><use href="#i-heart"/></svg></div>
+        <div>
+          <h2 class="h-small"><span data-l="en">A hobby project, made with care</span><span data-l="pl">Projekt hobbystyczny, robiony z sercem</span></h2>
+          <p data-l="en">AlphaForge is built after hours by one person — for fun, and because existing tools were either online-only, paid, or both. It is free and MIT-licensed: no ads, no subscriptions, no data collection. There is no company behind it and no warranty or guaranteed support, but bug reports and ideas on GitHub are very welcome.</p>
+          <p data-l="pl">AlphaForge powstaje po godzinach, tworzony przez jedną osobę — dla frajdy i dlatego, że istniejące narzędzia działały tylko online, były płatne albo jedno i drugie. Jest darmowy, na licencji MIT: bez reklam, subskrypcji i zbierania danych. Nie stoi za nim żadna firma, nie ma gwarancji ani zapewnionego wsparcia — ale zgłoszenia błędów i pomysły na GitHubie są bardzo mile widziane.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Before / after demo -->
+    <section class="section" id="demo">
+      <div class="wrap demo">
+        <div class="demo-text">
+          <p class="kicker"><span data-l="en">See the edge</span><span data-l="pl">Zobacz krawędź</span></p>
+          <h2><span data-l="en">Fur stays fur. The background is really gone.</span><span data-l="pl">Futro zostaje futrem. Tło naprawdę znika.</span></h2>
+          <p data-l="en">This is the <b>Hair &amp; fur</b> model straight out of the app — no manual touch-ups. Soft edges get partial transparency instead of a jagged mask, and leftover background colour is removed from the strands, so the cut-out looks right on any colour.</p>
+          <p data-l="pl">To model <b>Włosy i sierść</b> prosto z aplikacji — bez ręcznych poprawek. Miękkie krawędzie dostają częściową przezroczystość zamiast poszarpanej maski, a resztki koloru tła są usuwane z kosmyków, więc wycięcie dobrze wygląda na każdym kolorze.</p>
+          <p class="muted small" data-l="en">Drag the handle, then try a different background.</p>
+          <p class="muted small" data-l="pl">Przeciągnij uchwyt, a potem wypróbuj inne tło.</p>
+          <div class="seg seg-bg" role="group" aria-label="Background" data-pl-aria-label="Tło">
+            <button type="button" data-bg="checker" aria-pressed="true"><span data-l="en">Transparent</span><span data-l="pl">Przezroczyste</span></button>
+            <button type="button" data-bg="white" aria-pressed="false"><span data-l="en">White</span><span data-l="pl">Białe</span></button>
+            <button type="button" data-bg="dark" aria-pressed="false"><span data-l="en">Dark</span><span data-l="pl">Ciemne</span></button>
+            <button type="button" data-bg="color" aria-pressed="false"><span data-l="en">Colour</span><span data-l="pl">Kolor</span></button>
+          </div>
+        </div>
+        <div class="ba" id="ba" data-bg="checker" style="--pos:50%">
+          <img class="ba-after" src="assets/demo/dog-after.webp" srcset="assets/demo/dog-after-sm.webp 640w, assets/demo/dog-after.webp 1100w"
+               sizes="(max-width: 900px) 92vw, 560px" width="1100" height="1033" loading="lazy"
+               alt="Golden retriever cut out, background removed" data-pl-alt="Wycięty golden retriever, tło usunięte">
+          <div class="ba-before">
+            <img src="assets/demo/dog-before.webp" srcset="assets/demo/dog-before-sm.webp 640w, assets/demo/dog-before.webp 1100w"
+                 sizes="(max-width: 900px) 92vw, 560px" width="1100" height="1033" loading="lazy"
+                 alt="Original photo of a golden retriever" data-pl-alt="Oryginalne zdjęcie golden retrievera">
+          </div>
+          <span class="ba-tag ba-tag-l"><span data-l="en">Original</span><span data-l="pl">Oryginał</span></span>
+          <span class="ba-tag ba-tag-r"><span data-l="en">AlphaForge</span><span data-l="pl">AlphaForge</span></span>
+          <div class="ba-handle" aria-hidden="true"><span><svg class="ico"><use href="#i-chevron-left"/></svg><svg class="ico"><use href="#i-chevron-right"/></svg></span></div>
+          <input class="ba-range" type="range" min="0" max="100" value="50" aria-label="Before / after" data-pl-aria-label="Przed / po">
+        </div>
+      </div>
+    </section>
+
+    <!-- Features -->
+    <section class="section" id="features">
+      <div class="wrap">
+        <div class="section-head">
+          <p class="kicker"><span data-l="en">Features</span><span data-l="pl">Funkcje</span></p>
+          <h2><span data-l="en">Everything between “raw photo” and “ready to publish”</span><span data-l="pl">Wszystko pomiędzy „surowym zdjęciem” a „gotowe do publikacji”</span></h2>
+        </div>
+        <div class="grid">
+          <article class="card">
+            <div class="card-ico"><svg class="ico"><use href="#i-scissors"/></svg></div>
+            <h3><span data-l="en">AI background removal</span><span data-l="pl">Usuwanie tła z AI</span></h3>
+            <p data-l="en">Three BiRefNet models: <b>Fast</b> (built in, works offline), <b>Best quality</b> for products, people and cars, and <b>Hair &amp; fur</b> for soft alpha. Shift, feather and harden the edge, remove stray specks.</p>
+            <p data-l="pl">Trzy modele BiRefNet: <b>Szybki</b> (wbudowany, działa offline), <b>Najlepsza jakość</b> dla produktów, ludzi i aut oraz <b>Włosy i sierść</b> dla miękkiej przezroczystości. Przesuwanie, wygładzanie i utwardzanie krawędzi, usuwanie drobnych plamek.</p>
+          </article>
+          <article class="card">
+            <div class="card-ico"><svg class="ico"><use href="#i-brush"/></svg></div>
+            <h3><span data-l="en">Refine by hand</span><span data-l="pl">Ręczne poprawki</span></h3>
+            <p data-l="en">When AI guesses wrong, paint over it: <b>Keep</b>, <b>Erase</b> or <b>Restore</b> with an adjustable brush. Check the result with the before/after slider and on different backgrounds.</p>
+            <p data-l="pl">Gdy AI się pomyli, po prostu zamaluj: pędzel <b>Zachowaj</b>, <b>Usuń</b> lub <b>Przywróć</b> z regulowanym rozmiarem. Sprawdź efekt suwakiem przed/po i na różnych tłach.</p>
+          </article>
+          <article class="card">
+            <div class="card-ico"><svg class="ico"><use href="#i-workflow"/></svg></div>
+            <h3><span data-l="en">Pipelines &amp; presets</span><span data-l="pl">Pipeline'y i presety</span></h3>
+            <p data-l="en">Chain steps into a pipeline, reorder them by dragging, switch them on and off, and save your own presets. Ten ready-made ones cover the usual jobs.</p>
+            <p data-l="pl">Łącz kroki w pipeline, zmieniaj ich kolejność przeciąganiem, włączaj i wyłączaj, zapisuj własne presety. Dziesięć gotowych obsługuje typowe zadania.</p>
+          </article>
+          <article class="card">
+            <div class="card-ico"><svg class="ico"><use href="#i-layers"/></svg></div>
+            <h3><span data-l="en">Batch processing</span><span data-l="pl">Przetwarzanie wsadowe</span></h3>
+            <p data-l="en">Drop files or whole folders and export everything with one click — optionally keeping the folder structure. A broken file never stops the batch, and you can cancel at any time.</p>
+            <p data-l="pl">Upuść pliki lub całe foldery i wyeksportuj wszystko jednym kliknięciem — opcjonalnie z zachowaniem struktury folderów. Uszkodzony plik nie zatrzymuje partii, a anulować można w każdej chwili.</p>
+          </article>
+          <article class="card">
+            <div class="card-ico"><svg class="ico"><use href="#i-sparkles"/></svg></div>
+            <h3><span data-l="en">AI upscale 2× / 4×</span><span data-l="pl">Powiększanie AI 2× / 4×</span></h3>
+            <p data-l="en">Real-ESRGAN with three flavours: <b>General</b> (fast, with noise control), <b>Photo</b> (maximum detail) and <b>Illustration</b> for drawings and pixel-clean graphics.</p>
+            <p data-l="pl">Real-ESRGAN w trzech odmianach: <b>Ogólny</b> (szybki, z redukcją szumu), <b>Zdjęcia</b> (maksimum detali) i <b>Ilustracje</b> do rysunków i grafik.</p>
+          </article>
+          <article class="card">
+            <div class="card-ico"><svg class="ico"><use href="#i-file-image"/></svg></div>
+            <h3><span data-l="en">Convert &amp; compress</span><span data-l="pl">Konwersja i kompresja</span></h3>
+            <p data-l="en">PNG (lossless optimisation or palette), JPG, WebP and AVIF. See the output size and savings live, before you export. You get a warning when a format can't keep transparency.</p>
+            <p data-l="pl">PNG (bezstratna optymalizacja lub paleta), JPG, WebP i AVIF. Rozmiar wyniku i oszczędność widać na żywo, jeszcze przed eksportem. Dostaniesz ostrzeżenie, gdy format nie zachowa przezroczystości.</p>
+          </article>
+          <article class="card">
+            <div class="card-ico"><svg class="ico"><use href="#i-crop"/></svg></div>
+            <h3><span data-l="en">Trim, padding, resize</span><span data-l="pl">Przycinanie, marginesy, rozmiar</span></h3>
+            <p data-l="en">Trim empty edges, add even padding or centre on a fixed canvas, resize by percent, width, height or aspect ratio — or use presets like 1024 × 1024 or a 1920 px hero.</p>
+            <p data-l="pl">Obcinaj puste krawędzie, dodawaj równe marginesy lub centruj na stałym płótnie, zmieniaj rozmiar procentowo, szerokością, wysokością lub proporcjami — albo użyj presetów, np. 1024 × 1024 czy baner 1920 px.</p>
+          </article>
+          <article class="card">
+            <div class="card-ico"><svg class="ico"><use href="#i-zap"/></svg></div>
+            <h3><span data-l="en">Fast on NVIDIA, works everywhere</span><span data-l="pl">Szybki na NVIDIA, działa wszędzie</span></h3>
+            <p data-l="en">An optional one-click CUDA pack makes a cut-out take about half a second. Without an NVIDIA card everything still works on the CPU — just slower.</p>
+            <p data-l="pl">Opcjonalny pakiet CUDA instalowany jednym kliknięciem skraca wycinanie do około pół sekundy. Bez karty NVIDIA wszystko działa na procesorze — tylko wolniej.</p>
+          </article>
+          <article class="card">
+            <div class="card-ico"><svg class="ico"><use href="#i-sliders-horizontal"/></svg></div>
+            <h3><span data-l="en">The little things</span><span data-l="pl">Drobiazgi, które cieszą</span></h3>
+            <p data-l="en">Paste screenshots with Ctrl+V, drag from Explorer, copy the result to the clipboard, zoom and pan, dark and light theme, open the output folder, reprocess. English and Polish UI.</p>
+            <p data-l="pl">Wklejanie zrzutów przez Ctrl+V, przeciąganie z Eksploratora, kopiowanie wyniku do schowka, zoom i przesuwanie, motyw ciemny i jasny, otwieranie folderu wyników, ponowne przetwarzanie. Interfejs po polsku i angielsku.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- Pipeline -->
+    <section class="section section-alt" id="pipeline">
+      <div class="wrap">
+        <div class="section-head">
+          <p class="kicker"><span data-l="en">How it works</span><span data-l="pl">Jak to działa</span></p>
+          <h2><span data-l="en">Pick a preset, tweak it, export everything</span><span data-l="pl">Wybierz preset, dopasuj go, wyeksportuj wszystko</span></h2>
+          <p class="muted" data-l="en">Every file goes through the same pipeline. The preview updates as you change settings, so you see the result before exporting.</p>
+          <p class="muted" data-l="pl">Każdy plik przechodzi przez ten sam pipeline. Podgląd aktualizuje się przy każdej zmianie, więc wynik widać przed eksportem.</p>
+        </div>
+        <ol class="flow" aria-label="Pipeline steps" data-pl-aria-label="Kroki pipeline'u">
+          <li><svg class="ico"><use href="#i-scissors"/></svg><span data-l="en">Remove background</span><span data-l="pl">Usuń tło</span></li>
+          <li><svg class="ico"><use href="#i-crop"/></svg><span data-l="en">Trim</span><span data-l="pl">Przytnij</span></li>
+          <li><svg class="ico"><use href="#i-maximize-2"/></svg><span data-l="en">Padding</span><span data-l="pl">Margines</span></li>
+          <li><svg class="ico"><use href="#i-image-plus"/></svg><span data-l="en">Resize</span><span data-l="pl">Zmień rozmiar</span></li>
+          <li><svg class="ico"><use href="#i-sparkles"/></svg><span data-l="en">Upscale</span><span data-l="pl">Powiększ</span></li>
+          <li><svg class="ico"><use href="#i-wand-sparkles"/></svg><span data-l="en">Enhance &amp; fill</span><span data-l="pl">Popraw i wypełnij</span></li>
+          <li><svg class="ico"><use href="#i-file-image"/></svg><span data-l="en">PNG · JPG · WebP · AVIF</span><span data-l="pl">PNG · JPG · WebP · AVIF</span></li>
+        </ol>
+        <h3 class="h-small presets-title"><span data-l="en">Built-in presets</span><span data-l="pl">Wbudowane presety</span></h3>
+        <ul class="presets">
+          <li><b><span data-l="en">Transparent Asset</span><span data-l="pl">Grafika z przezroczystością</span></b><span data-l="en">cut-out with tight margins, PNG</span><span data-l="pl">wycięcie z ciasnym marginesem, PNG</span></li>
+          <li><b><span data-l="en">Web Asset</span><span data-l="pl">Grafika na stronę</span></b><span data-l="en">centred on 1024 × 1024, WebP</span><span data-l="pl">wyśrodkowany na 1024 × 1024, WebP</span></li>
+          <li><b><span data-l="en">Website Hero</span><span data-l="pl">Baner strony</span></b><span data-l="en">up to 1920 px wide, WebP</span><span data-l="pl">do 1920 px szerokości, WebP</span></li>
+          <li><b><span data-l="en">Thumbnail</span><span data-l="pl">Miniatura</span></b><span data-l="en">small and light</span><span data-l="pl">mała i lekka</span></li>
+          <li><b><span data-l="en">Product Photo</span><span data-l="pl">Zdjęcie produktu</span></b><span data-l="en">on pure white, 2000 × 2000, JPG</span><span data-l="pl">na czystej bieli, 2000 × 2000, JPG</span></li>
+          <li><b><span data-l="en">Game Texture</span><span data-l="pl">Tekstura do gry</span></b><span data-l="en">1024 × 1024 power-of-two, lossless PNG</span><span data-l="pl">1024 × 1024 (potęga dwójki), bezstratny PNG</span></li>
+          <li><b><span data-l="en">PNG Alpha</span><span data-l="pl">PNG z alfą</span></b><span data-l="en">background removed, same size</span><span data-l="pl">bez tła, ten sam rozmiar</span></li>
+          <li><b><span data-l="en">Small WebP</span><span data-l="pl">Mały WebP</span></b><span data-l="en">fit within 1600 px, for sharing</span><span data-l="pl">maks. 1600 px, do udostępniania</span></li>
+          <li><b><span data-l="en">Upscale 4×</span><span data-l="pl">Powiększenie 4×</span></b><span data-l="en">AI super-resolution, JPG</span><span data-l="pl">superrozdzielczość AI, JPG</span></li>
+          <li><b><span data-l="en">Compress</span><span data-l="pl">Kompresja</span></b><span data-l="en">same format, smaller file</span><span data-l="pl">ten sam format, mniejszy plik</span></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- Screenshots -->
+    <section class="section" id="screens">
+      <div class="wrap">
+        <div class="section-head">
+          <p class="kicker"><span data-l="en">Screenshots</span><span data-l="pl">Zrzuty ekranu</span></p>
+          <h2><span data-l="en">A tool that looks like it belongs on your desktop</span><span data-l="pl">Narzędzie, które dobrze wygląda na pulpicie</span></h2>
+          <p class="muted" data-l="en">Click a screenshot to enlarge it. The screenshots follow the language you picked above.</p>
+          <p class="muted" data-l="pl">Kliknij zrzut, aby go powiększyć. Zrzuty pokazują interfejs w wybranym powyżej języku.</p>
+        </div>
+        <div class="gallery">
+          <figure>
+            <button type="button" class="shot-btn" data-open="compare">
+              <img data-shot="compare" data-sm src="assets/shots/en-compare-sm.webp" width="900" height="562" loading="lazy"
+                   alt="Before/after comparison of an arctic fox cut-out" data-pl-alt="Porównanie przed/po wycięcia lisa polarnego">
+            </button>
+            <figcaption><span data-l="en">Before/after slider on an arctic fox</span><span data-l="pl">Suwak przed/po na lisie polarnym</span></figcaption>
+          </figure>
+          <figure>
+            <button type="button" class="shot-btn" data-open="refine">
+              <img data-shot="refine" data-sm src="assets/shots/en-refine-sm.webp" width="900" height="562" loading="lazy"
+                   alt="Refine cut-out mode with the Keep brush" data-pl-alt="Tryb poprawiania wycięcia z pędzlem Zachowaj">
+            </button>
+            <figcaption><span data-l="en">Refine mode: keep, erase or restore with a brush</span><span data-l="pl">Tryb poprawek: zachowaj, usuń lub przywróć pędzlem</span></figcaption>
+          </figure>
+          <figure>
+            <button type="button" class="shot-btn" data-open="batch">
+              <img data-shot="batch" data-sm src="assets/shots/en-batch-sm.webp" width="900" height="562" loading="lazy"
+                   alt="Batch export of ten files with the Web Asset preset" data-pl-alt="Eksport wsadowy dziesięciu plików z presetem Grafika na stronę">
+            </button>
+            <figcaption><span data-l="en">Batch export with the Web Asset preset</span><span data-l="pl">Eksport wsadowy z presetem Grafika na stronę</span></figcaption>
+          </figure>
+          <figure>
+            <button type="button" class="shot-btn" data-open="light">
+              <img data-shot="light" data-sm src="assets/shots/en-light-sm.webp" width="900" height="562" loading="lazy"
+                   alt="Light theme with the Product Photo preset on a coffee cup" data-pl-alt="Jasny motyw z presetem Zdjęcie produktu na filiżance kawy">
+            </button>
+            <figcaption><span data-l="en">Light theme, Product Photo preset</span><span data-l="pl">Jasny motyw, preset Zdjęcie produktu</span></figcaption>
+          </figure>
+          <figure>
+            <button type="button" class="shot-btn" data-open="settings">
+              <img data-shot="settings" data-sm src="assets/shots/en-settings-sm.webp" width="900" height="562" loading="lazy"
+                   alt="AI and GPU settings with model downloads and the GPU pack" data-pl-alt="Ustawienia AI i GPU z pobieraniem modeli i pakietem GPU">
+            </button>
+            <figcaption><span data-l="en">AI &amp; GPU settings: models and the GPU pack</span><span data-l="pl">Ustawienia AI i GPU: modele i pakiet GPU</span></figcaption>
+          </figure>
+          <figure>
+            <button type="button" class="shot-btn" data-open="hero">
+              <img data-shot="hero" data-sm src="assets/shots/en-hero-sm.webp" width="900" height="562" loading="lazy"
+                   alt="Model choice for background removal" data-pl-alt="Wybór modelu do usuwania tła">
+            </button>
+            <figcaption><span data-l="en">Choosing the background model</span><span data-l="pl">Wybór modelu usuwania tła</span></figcaption>
+          </figure>
+        </div>
+      </div>
+    </section>
+
+    <!-- Privacy -->
+    <section class="section section-alt" id="privacy">
+      <div class="wrap privacy">
+        <div>
+          <p class="kicker"><span data-l="en">Privacy</span><span data-l="pl">Prywatność</span></p>
+          <h2><span data-l="en">Your photos never leave your computer</span><span data-l="pl">Twoje zdjęcia nie opuszczają komputera</span></h2>
+          <blockquote class="quote">
+            <svg class="ico"><use href="#i-shield-check"/></svg>
+            <span data-l="en">“Processing happens locally on this computer. Images are not uploaded.”</span>
+            <span data-l="pl">„Przetwarzanie odbywa się lokalnie na tym komputerze. Zdjęcia nie są nigdzie wysyłane.”</span>
+          </blockquote>
+          <p class="muted small" data-l="en">— the promise on the app's start screen and in its status bar. It holds by design, and the code is open, so you can check.</p>
+          <p class="muted small" data-l="pl">— obietnica z ekranu startowego i paska stanu aplikacji. Tak to zaprojektowano, a kod jest otwarty, więc możesz to sprawdzić.</p>
+        </div>
+        <ul class="checks">
+          <li><svg class="ico"><use href="#i-check"/></svg><div><b><span data-l="en">No accounts, no telemetry, no analytics</span><span data-l="pl">Bez kont, telemetrii i analityki</span></b>
+            <span data-l="en">The app doesn't phone home. There is nothing to sign in to.</span><span data-l="pl">Aplikacja nic nie wysyła „do domu”. Nie ma się do czego logować.</span></div></li>
+          <li><svg class="ico"><use href="#i-check"/></svg><div><b><span data-l="en">Network only when you ask for it</span><span data-l="pl">Sieć tylko wtedy, gdy o to poprosisz</span></b>
+            <span data-l="en">The internet is used only when you click to download an optional model or the GPU pack — from the official sources (Hugging Face, GitHub, NVIDIA), each file checked against a SHA-256 hash.</span><span data-l="pl">Internet jest używany tylko po kliknięciu pobierania opcjonalnego modelu lub pakietu GPU — z oficjalnych źródeł (Hugging Face, GitHub, NVIDIA), a każdy plik jest sprawdzany sumą SHA-256.</span></div></li>
+          <li><svg class="ico"><use href="#i-check"/></svg><div><b><span data-l="en">Clean exports</span><span data-l="pl">Czyste pliki wynikowe</span></b>
+            <span data-l="en">Exported images don't carry hidden metadata such as camera details or GPS location.</span><span data-l="pl">Wyeksportowane obrazy nie niosą ukrytych metadanych, takich jak dane aparatu czy lokalizacja GPS.</span></div></li>
+          <li><svg class="ico"><use href="#i-check"/></svg><div><b><span data-l="en">Works offline</span><span data-l="pl">Działa offline</span></b>
+            <span data-l="en">The Fast model and all other tools are included in the installer.</span><span data-l="pl">Model Szybki i wszystkie pozostałe narzędzia są w instalatorze.</span></div></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- Performance -->
+    <section class="section" id="performance">
+      <div class="wrap perf">
+        <div>
+          <p class="kicker"><span data-l="en">Performance</span><span data-l="pl">Wydajność</span></p>
+          <h2><span data-l="en">How fast is it?</span><span data-l="pl">Jak szybko to działa?</span></h2>
+          <p class="muted" data-l="en">Measured on a mid-range gaming laptop (Ryzen 7 5800H, GeForce RTX 3060 Laptop 6 GB). Your numbers will differ — the CPU column is the honest worst case.</p>
+          <p class="muted" data-l="pl">Pomiary na laptopie ze średniej półki (Ryzen 7 5800H, GeForce RTX 3060 Laptop 6 GB). U Ciebie wyniki będą inne — kolumna CPU to uczciwy najgorszy przypadek.</p>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th><span data-l="en">Task</span><span data-l="pl">Zadanie</span></th><th>GPU</th><th>CPU</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><span data-l="en">Remove background, Fast</span><span data-l="pl">Usuwanie tła, Szybki</span></td><td>0.25 s</td><td>3.6 s</td></tr>
+              <tr><td><span data-l="en">Remove background, Best quality / Hair &amp; fur</span><span data-l="pl">Usuwanie tła, Najlepsza jakość / Włosy i sierść</span></td><td>0.5 s</td><td>11 s</td></tr>
+              <tr><td><span data-l="en">Upscale 4×, General (per input megapixel)</span><span data-l="pl">Powiększanie 4×, Ogólny (na megapiksel wejścia)</span></td><td>0.4 s</td><td>13 s</td></tr>
+              <tr><td><span data-l="en">Batch: 24 photos → transparent PNG</span><span data-l="pl">Partia: 24 zdjęcia → przezroczysty PNG</span></td><td>29 s</td><td>—</td></tr>
+              <tr><td><span data-l="en">Batch: 24 photos → Web Asset WebP</span><span data-l="pl">Partia: 24 zdjęcia → Grafika na stronę (WebP)</span></td><td>21 s</td><td>—</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Download -->
+    <section class="section section-alt" id="download">
+      <div class="wrap">
+        <div class="section-head">
+          <p class="kicker"><span data-l="en">Download</span><span data-l="pl">Pobieranie</span></p>
+          <h2><span data-l="en">Install in a minute</span><span data-l="pl">Instalacja w minutę</span></h2>
+        </div>
+        <div class="dl">
+          <div class="dl-card">
+            <img src="assets/icon-256.png" width="64" height="64" alt="">
+            <div class="dl-meta">
+              <b>AlphaForge 1.0.0</b>
+              <span class="muted"><span data-l="en">Windows 10 (21H2+) or 11, 64-bit · 158 MB</span><span data-l="pl">Windows 10 (21H2+) lub 11, 64-bit · 158 MB</span></span>
+            </div>
+            <a class="btn btn-primary btn-lg" href="https://github.com/apkmasondev/AlphaForge/releases/download/v1.0.0/AlphaForge_1.0.0_x64-setup.exe">
+              <svg class="ico"><use href="#i-download"/></svg>
+              <span data-l="en">Download installer</span><span data-l="pl">Pobierz instalator</span>
+            </a>
+            <a class="link" href="https://github.com/apkmasondev/AlphaForge/releases">
+              <span data-l="en">All releases &amp; release notes</span><span data-l="pl">Wszystkie wydania i opisy zmian</span>
+              <svg class="ico"><use href="#i-arrow-up-right"/></svg>
+            </a>
+          </div>
+          <ol class="steps">
+            <li>
+              <b><span data-l="en">Run the installer</span><span data-l="pl">Uruchom instalator</span></b>
+              <span data-l="en">It installs just for your user — no administrator rights needed. Microsoft WebView2 is added automatically if it's missing.</span>
+              <span data-l="pl">Instaluje się tylko dla Twojego użytkownika — bez uprawnień administratora. Microsoft WebView2 zostanie doinstalowany, jeśli go brakuje.</span>
+            </li>
+            <li>
+              <b><span data-l="en">If Windows SmartScreen appears</span><span data-l="pl">Jeśli pojawi się Windows SmartScreen</span></b>
+              <span data-l="en">Click <kbd>More info</kbd> → <kbd>Run anyway</kbd>. The installer isn't code-signed — certificates cost money every year, which doesn't fit a free hobby project. You can verify the file instead (below).</span>
+              <span data-l="pl">Kliknij <kbd>Więcej informacji</kbd> → <kbd>Uruchom mimo to</kbd>. Instalator nie jest podpisany cyfrowo — certyfikaty kosztują co roku, co nie pasuje do darmowego, hobbystycznego projektu. Zamiast tego możesz zweryfikować plik (poniżej).</span>
+            </li>
+            <li>
+              <b><span data-l="en">Optional: speed it up on NVIDIA</span><span data-l="pl">Opcjonalnie: przyspiesz na NVIDIA</span></b>
+              <span data-l="en">Settings → AI &amp; GPU → GPU acceleration pack → Install (one-time 1.46 GB download, driver 528 or newer), then restart the app. The larger models (424 MB and 844 MB) download from the same screen when you first need them.</span>
+              <span data-l="pl">Ustawienia → AI i GPU → Pakiet akceleracji GPU → Zainstaluj (jednorazowo 1,46 GB, sterownik 528 lub nowszy), potem uruchom aplikację ponownie. Większe modele (424 MB i 844 MB) pobierzesz z tego samego ekranu, gdy będą potrzebne.</span>
+            </li>
+          </ol>
+        </div>
+        <details class="verify">
+          <summary><span data-l="en">Verify the download (SHA-256)</span><span data-l="pl">Zweryfikuj pobrany plik (SHA-256)</span></summary>
+          <p data-l="en">In PowerShell, in the folder with the installer:</p>
+          <p data-l="pl">W PowerShellu, w folderze z instalatorem:</p>
+          <pre><code>Get-FileHash .\AlphaForge_1.0.0_x64-setup.exe -Algorithm SHA256</code></pre>
+          <p data-l="en">The result should be:</p>
+          <p data-l="pl">Wynik powinien wynosić:</p>
+          <pre><code class="hash">C34DBA046AEAA8EE9D3187B7529D2C528219A4071381C71848D66E77ED5E232A</code></pre>
+        </details>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="section" id="faq">
+      <div class="wrap narrow">
+        <div class="section-head">
+          <p class="kicker">FAQ</p>
+          <h2><span data-l="en">Questions people ask</span><span data-l="pl">Często zadawane pytania</span></h2>
+        </div>
+        <div class="faq">
+          <details>
+            <summary><span data-l="en">Is it really free? Can I use it for commercial work?</span><span data-l="pl">Czy to naprawdę za darmo? Mogę używać tego komercyjnie?</span></summary>
+            <p data-l="en">Yes and yes. AlphaForge is MIT-licensed, and the AI models it uses are MIT (BiRefNet) and BSD-3-Clause (Real-ESRGAN) — both allow commercial use. Models with non-commercial licences were deliberately left out. The images you create are yours; just make sure you have the rights to the photos you put in.</p>
+            <p data-l="pl">Tak i tak. AlphaForge jest na licencji MIT, a używane modele AI są na licencjach MIT (BiRefNet) i BSD-3-Clause (Real-ESRGAN) — obie pozwalają na użytek komercyjny. Modele z licencjami niekomercyjnymi zostały celowo pominięte. Obrazy, które tworzysz, należą do Ciebie — upewnij się tylko, że masz prawa do zdjęć, które wrzucasz.</p>
+          </details>
+          <details>
+            <summary><span data-l="en">Do I need an NVIDIA graphics card?</span><span data-l="pl">Czy potrzebuję karty graficznej NVIDIA?</span></summary>
+            <p data-l="en">No. Everything runs on the CPU too. An NVIDIA card with the optional GPU pack just makes AI steps 10–30× faster, which matters most for big batches and the larger models.</p>
+            <p data-l="pl">Nie. Wszystko działa także na procesorze. Karta NVIDIA z opcjonalnym pakietem GPU przyspiesza kroki AI 10–30 razy, co ma znaczenie głównie przy dużych partiach i większych modelach.</p>
+          </details>
+          <details>
+            <summary><span data-l="en">Does it work without the internet?</span><span data-l="pl">Czy działa bez internetu?</span></summary>
+            <p data-l="en">Yes. After installation the Fast background model, upscaling and all the other tools work offline. You only need a connection to download the optional larger models or the GPU pack.</p>
+            <p data-l="pl">Tak. Po instalacji model Szybki, powiększanie i wszystkie pozostałe narzędzia działają offline. Połączenie jest potrzebne tylko do pobrania opcjonalnych większych modeli lub pakietu GPU.</p>
+          </details>
+          <details>
+            <summary><span data-l="en">Why does Windows warn me about the installer?</span><span data-l="pl">Dlaczego Windows ostrzega przed instalatorem?</span></summary>
+            <p data-l="en">SmartScreen warns about any program that isn't signed with a paid code-signing certificate and hasn't been downloaded by many people yet. Click <kbd>More info</kbd> → <kbd>Run anyway</kbd>. If you want to be sure, compare the SHA-256 hash above with the one on the release page, or build the app yourself from source.</p>
+            <p data-l="pl">SmartScreen ostrzega przed każdym programem, który nie jest podpisany płatnym certyfikatem i nie był jeszcze pobierany przez wiele osób. Kliknij <kbd>Więcej informacji</kbd> → <kbd>Uruchom mimo to</kbd>. Jeśli chcesz mieć pewność, porównaj sumę SHA-256 powyżej z tą na stronie wydania albo zbuduj aplikację samodzielnie ze źródeł.</p>
+          </details>
+          <details>
+            <summary><span data-l="en">Where are my results saved?</span><span data-l="pl">Gdzie zapisują się wyniki?</span></summary>
+            <p data-l="en">By default into an “AlphaForge” folder next to the originals. You can choose any folder, keep the source folder structure, add a prefix or suffix, and decide whether existing files get overwritten or renamed. The originals are never modified.</p>
+            <p data-l="pl">Domyślnie do folderu „AlphaForge” obok oryginałów. Możesz wybrać dowolny folder, zachować strukturę folderów źródłowych, dodać prefiks lub sufiks i zdecydować, czy istniejące pliki są nadpisywane, czy dostają nową nazwę. Oryginały nigdy nie są modyfikowane.</p>
+          </details>
+          <details>
+            <summary><span data-l="en">What about macOS or Linux?</span><span data-l="pl">A macOS albo Linux?</span></summary>
+            <p data-l="en">Not at the moment — AlphaForge is built and tested on Windows only. The code is open, so a port isn't impossible, but there are no plans or promises.</p>
+            <p data-l="pl">Na razie nie — AlphaForge jest budowany i testowany tylko na Windowsie. Kod jest otwarty, więc port nie jest wykluczony, ale nie ma planów ani obietnic.</p>
+          </details>
+          <details>
+            <summary><span data-l="en">How do I uninstall it completely?</span><span data-l="pl">Jak całkowicie odinstalować aplikację?</span></summary>
+            <p data-l="en">Uninstall it from Windows Settings → Apps. Downloaded models and the GPU pack live in <code>%LOCALAPPDATA%\AlphaForge</code> — remove them in the app (Settings → AI &amp; GPU) first, or delete that folder afterwards.</p>
+            <p data-l="pl">Odinstaluj ją w Ustawieniach Windows → Aplikacje. Pobrane modele i pakiet GPU znajdują się w <code>%LOCALAPPDATA%\AlphaForge</code> — usuń je najpierw w aplikacji (Ustawienia → AI i GPU) albo skasuj ten folder po odinstalowaniu.</p>
+          </details>
+          <details>
+            <summary><span data-l="en">I found a bug / I have an idea</span><span data-l="pl">Znalazłem błąd / mam pomysł</span></summary>
+            <p data-l="en">Great — please open an <a href="https://github.com/apkmasondev/AlphaForge/issues">issue on GitHub</a>. It's a hobby project, so answers may take a while, but every report is read.</p>
+            <p data-l="pl">Super — zgłoś to w <a href="https://github.com/apkmasondev/AlphaForge/issues">Issues na GitHubie</a>. To projekt hobbystyczny, więc odpowiedź może chwilę potrwać, ale każde zgłoszenie jest czytane.</p>
+          </details>
+        </div>
+      </div>
+    </section>
+
+    <!-- Credits -->
+    <section class="section section-alt" id="credits">
+      <div class="wrap">
+        <div class="section-head">
+          <p class="kicker"><span data-l="en">Credits</span><span data-l="pl">Podziękowania</span></p>
+          <h2><span data-l="en">Standing on the shoulders of giants</span><span data-l="pl">Na ramionach gigantów</span></h2>
+          <p class="muted" data-l="en">AlphaForge is not affiliated with any of the projects below — it just uses their excellent, openly licensed work.</p>
+          <p class="muted" data-l="pl">AlphaForge nie jest powiązany z żadnym z poniższych projektów — po prostu korzysta z ich świetnej, otwarcie licencjonowanej pracy.</p>
+        </div>
+        <div class="credits">
+          <div>
+            <h3 class="h-small"><span data-l="en">Models &amp; libraries</span><span data-l="pl">Modele i biblioteki</span></h3>
+            <ul>
+              <li><a href="https://github.com/ZhengPeng7/BiRefNet">BiRefNet</a> — Peng Zheng et al. · MIT</li>
+              <li><a href="https://github.com/xinntao/Real-ESRGAN">Real-ESRGAN</a> — Xintao Wang et al. · BSD-3-Clause</li>
+              <li><a href="https://onnxruntime.ai/">ONNX Runtime</a> — Microsoft · MIT</li>
+              <li><a href="https://tauri.app/">Tauri</a> · MIT / Apache-2.0</li>
+              <li><a href="https://lucide.dev/">Lucide</a> <span data-l="en">(icons)</span><span data-l="pl">(ikony)</span> · ISC</li>
+            </ul>
+          </div>
+          <div>
+            <h3 class="h-small"><span data-l="en">Photos in the screenshots</span><span data-l="pl">Zdjęcia na zrzutach ekranu</span></h3>
+            <p class="muted small" data-l="en">All public domain (CC0), via Wikimedia Commons:</p>
+            <p class="muted small" data-l="pl">Wszystkie w domenie publicznej (CC0), z Wikimedia Commons:</p>
+            <ul class="photo-credits">
+              <li><a href="https://commons.wikimedia.org/wiki/File:Golden-retriever-1827903_1920.jpg"><span data-l="en">Puppy</span><span data-l="pl">Szczeniak</span></a> — RetyiRetyi</li>
+              <li><a href="https://commons.wikimedia.org/wiki/File:Caleb_Fisher_2015_(Unsplash).jpg">Golden retriever</a> — Caleb Fisher</li>
+              <li><a href="https://commons.wikimedia.org/wiki/File:Arctic_fox_in_snow_(Unsplash).jpg"><span data-l="en">Arctic fox</span><span data-l="pl">Lis polarny</span></a> — Jonatan Pie</li>
+              <li><a href="https://commons.wikimedia.org/wiki/File:Black_coffee_cup_(Unsplash).jpg"><span data-l="en">Coffee</span><span data-l="pl">Kawa</span></a> — Ross Parmly</li>
+              <li><a href="https://commons.wikimedia.org/wiki/File:Alphacolor_13_2016-12-29_(Unsplash).jpg"><span data-l="en">Headphones</span><span data-l="pl">Słuchawki</span></a> — Alphacolor 13</li>
+              <li><a href="https://commons.wikimedia.org/wiki/File:%27Radhe%27_the_pet_cat_of_Worli_fish_marke_in_Mumbai..(Wednesday_14-3-2012).JPG"><span data-l="en">Cat</span><span data-l="pl">Kot</span></a> — Rudolph.A.furtado</li>
+              <li><a href="https://commons.wikimedia.org/wiki/File:!941_Lincoln_Continental_Coupe,_Series_57_-_Automobile_Driving_Museum_-_El_Segundo,_CA_-_DSC01970.jpg"><span data-l="en">Vintage car</span><span data-l="pl">Zabytkowe auto</span></a> — Daderot</li>
+              <li><a href="https://commons.wikimedia.org/wiki/File:Cussons_perfume_bottle_Floral_Otto.jpg"><span data-l="en">Perfume bottle</span><span data-l="pl">Flakon perfum</span></a>
+                  <span data-l="en">and</span><span data-l="pl">i</span>
+                  <a href="https://commons.wikimedia.org/wiki/File:Cussons_perfume_bottle_Guinness%27s_Extra_Stout_1925.jpg"><span data-l="en">bottle-shaped flacon</span><span data-l="pl">flakon w kształcie butelki</span></a> — Historian 1875</li>
+              <li><a href="https://commons.wikimedia.org/wiki/File:Helianthus_annuus_-_Jardin_universitaire_Roger-Van_den_Hende,_Quebec_22.jpg"><span data-l="en">Sunflower</span><span data-l="pl">Słonecznik</span></a> — <span data-l="en">see Commons page</span><span data-l="pl">autor na stronie Commons</span></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <div class="wrap foot-in">
+      <div class="brand">
+        <img src="assets/icon-256.png" width="22" height="22" alt="">
+        <span>AlphaForge</span>
+      </div>
+      <p class="muted small">
+        <span data-l="en">© 2026 apkmasondev · MIT licence · A hobby project with no warranty. This site uses no cookies, analytics or external fonts.</span>
+        <span data-l="pl">© 2026 apkmasondev · licencja MIT · Projekt hobbystyczny, bez gwarancji. Ta strona nie używa ciasteczek, analityki ani zewnętrznych czcionek.</span>
+      </p>
+      <a class="link" href="https://github.com/apkmasondev/AlphaForge"><svg class="ico"><use href="#i-github"/></svg> GitHub</a>
+    </div>
+  </footer>
+
+  <dialog class="lightbox" id="lightbox" aria-label="Screenshot" data-pl-aria-label="Zrzut ekranu">
+    <button type="button" class="lb-btn lb-close" data-lb="close" aria-label="Close" data-pl-aria-label="Zamknij"><svg class="ico"><use href="#i-x"/></svg></button>
+    <button type="button" class="lb-btn lb-prev" data-lb="prev" aria-label="Previous" data-pl-aria-label="Poprzedni"><svg class="ico"><use href="#i-chevron-left"/></svg></button>
+    <figure>
+      <img id="lb-img" src="" alt="" width="1800" height="1125">
+      <figcaption id="lb-cap"></figcaption>
+    </figure>
+    <button type="button" class="lb-btn lb-next" data-lb="next" aria-label="Next" data-pl-aria-label="Następny"><svg class="ico"><use href="#i-chevron-right"/></svg></button>
+  </dialog>
+
+  <script src="script.js" defer></script>
+</body>
+</html>
