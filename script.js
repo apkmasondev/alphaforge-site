@@ -3,7 +3,7 @@
   "use strict";
 
   var root = document.documentElement;
-  var SHOTS = ["hero", "compare", "refine", "batch", "light", "settings"];
+  var SHOTS = ["hero", "compare", "refine", "batch", "light", "settings", "blur"];
   var TITLES = {
     en: "AlphaForge — local background removal & image toolkit for Windows",
     pl: "AlphaForge — lokalne usuwanie tła i narzędzia do obrazów dla Windows",
@@ -119,9 +119,15 @@
     setPos(Number(range.value));
   });
 
+  // "Blurred (AI)" swaps the cut-out for the app's depth-aware blur result.
+  var after = ba.querySelector(".ba-after");
+  var cutSrc = after.getAttribute("src"), cutSet = after.getAttribute("srcset");
   document.querySelectorAll("[data-bg]").forEach(function (b) {
     if (b === ba) return;
     b.addEventListener("click", function () {
+      var blur = b.getAttribute("data-bg") === "blur";
+      after.setAttribute("src", blur ? "assets/demo/dog-blur.webp" : cutSrc);
+      after.setAttribute("srcset", blur ? "assets/demo/dog-blur-sm.webp 640w, assets/demo/dog-blur.webp 1100w" : cutSet);
       ba.setAttribute("data-bg", b.getAttribute("data-bg"));
       document.querySelectorAll(".seg-bg [data-bg]").forEach(function (o) {
         o.setAttribute("aria-pressed", String(o === b));

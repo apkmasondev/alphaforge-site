@@ -754,6 +754,28 @@ code {
   transform: translateY(-2px);
 }
 
+.card-wide {
+  grid-column: 1 / -1;
+}
+
+.card-new {
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--line));
+  background: linear-gradient(160deg, var(--accent-weak), var(--panel) 55%);
+}
+
+.new-badge {
+  display: inline-block;
+  vertical-align: 2px;
+  margin-left: 6px;
+  padding: 0.1em 0.55em;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--on-accent);
+  background: var(--accent);
+}
+
 .card p {
   color: var(--text-2);
   font-size: 0.95rem;
