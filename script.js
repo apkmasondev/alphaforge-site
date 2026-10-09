@@ -3,7 +3,7 @@
   "use strict";
 
   var root = document.documentElement;
-  var SHOTS = ["hero", "compare", "refine", "batch", "light", "settings", "blur"];
+  var SHOTS = ["hero", "compare", "refine", "batch", "light", "blur", "sticker"];
   var TITLES = {
     en: "AlphaForge — local background removal & image toolkit for Windows",
     pl: "AlphaForge — lokalne usuwanie tła i narzędzia do obrazów dla Windows",
